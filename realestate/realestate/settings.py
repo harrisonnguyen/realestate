@@ -61,9 +61,11 @@ NEWSPIDER_MODULE = 'realestate.spiders'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'realestate.pipelines.SomePipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'realestate.pipelines.RealestatePipeline': 300,
+	'realestate.pipelines.EmptycarPipeline': 350,
+	'realestate.pipelines.CSVPipeline': 400,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
