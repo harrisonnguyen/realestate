@@ -28,6 +28,26 @@ class EmptycarPipeline(object):
 		if not item['bathrooms']:
 			item['bathrooms'] = 0
 		return item
+		
+class RequestPipeline(object):
+	def process_item(self, item, spider):
+		if 'request' in ''.join(item['address']):
+			raise DropItem('No address given')
+		else:
+			return item
+
+class DuplicatesPipeline(object):
+
+	def __init__(self):
+		self.ids_seen = set()
+
+	def process_item(self, item, spider):
+		str1 = ''.join(item['address'])
+		if str1 in self.ids_seen:
+			raise DropItem("Duplicate item found: %s" % str1)
+		else:
+			self.ids_seen.add(str1)
+			return item
 
 class CSVPipeline(object):
 	@classmethod

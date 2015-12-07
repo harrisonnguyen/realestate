@@ -62,7 +62,9 @@ NEWSPIDER_MODULE = 'realestate.spiders'
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+	'realestate.pipelines.DuplicatesPipeline': 250,
     'realestate.pipelines.RealestatePipeline': 300,
+	'realestate.pipelines.RequestPipeline': 320,
 	'realestate.pipelines.EmptycarPipeline': 350,
 	'realestate.pipelines.CSVPipeline': 400,
 }
