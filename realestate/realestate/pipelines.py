@@ -12,10 +12,13 @@ from scrapy.contrib.exporter import CsvItemExporter
 
 class RealestatePipeline(object):
     def process_item(self, item, spider):
+		if spider.name == 'past_realestate':
+			if not item['sold_date'] or item['sold_date'] == 'N/A':
+				raise DropItem("No date in %s" %item['address'])
 		if len(item['bathrooms']) > 1:
 			raise DropItem("Multiple bathroom inputs in %s" %item['address'])
-		elif "Other" in item['propertyType'] or "Residential Land" in item['propertyType']:
-			raise DropItem("Land  in %s" %item['address'])
+		#elif "Other" in item['propertyType'] or "Residential Land" in item['propertyType']:
+			#raise DropItem("Land  in %s" %item['address'])
 		else:
 			return item
 
@@ -27,6 +30,9 @@ class EmptycarPipeline(object):
 			item['bedrooms'] = 0
 		if not item['bathrooms']:
 			item['bathrooms'] = 0
+		if spider.name == 'past_realestate':
+			if not item['price']:
+				raise DropItem("No price ins %s"%item['address'])
 		return item
 		
 class RequestPipeline(object):
@@ -42,12 +48,20 @@ class DuplicatesPipeline(object):
 		self.ids_seen = set()
 
 	def process_item(self, item, spider):
-		str1 = ''.join(item['address'])
-		if str1 in self.ids_seen:
-			raise DropItem("Duplicate item found: %s" % str1)
+		if spider.name == 'past_realestate':
+			str1 = ''.join(item['address'])
+			str2 = ''.join(item['sold_date'])
+			if str1 + str2 in self.ids_seen:
+				raise DropItem("Duplicate item found: %s") %str1
+			else:
+				return item
 		else:
-			self.ids_seen.add(str1)
-			return item
+			str1 = ''.join(item['address'])
+			if str1 in self.ids_seen:
+				raise DropItem("Duplicate item found: %s" % str1)
+			else:
+				self.ids_seen.add(str1)
+				return item
 
 class CSVPipeline(object):
 	@classmethod
@@ -58,7 +72,10 @@ class CSVPipeline(object):
 		return pipeline
 
 	def spider_opened(self, spider):
-		self.file = open('output.csv', 'w+b')
+		if spider.name in 'realestate':
+			self.file = open('current_listing.csv', 'w+b')
+		else:
+			self.file = open('past_listing.csv', 'w+b')
 		self.exporter = CsvItemExporter(self.file)
 		self.exporter.start_exporting()
 

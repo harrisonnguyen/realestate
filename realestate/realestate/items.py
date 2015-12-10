@@ -19,3 +19,4 @@ class RealEstateItem(scrapy.Item):
 	bathrooms = scrapy.Field()
 	car = scrapy.Field()
 	descript = scrapy.Field()
+	sold_date = scrapy.Field()
