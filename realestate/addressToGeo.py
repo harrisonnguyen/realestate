@@ -10,14 +10,17 @@ import csv
 def main():
 	makeShapeFile()
 
-def getLatLong(coord, address):
+def getLatLong(coord, address,postCode):
 	if '&' in address:
 		i = address.index('&')
 		address = address[i+1:]
 	if '(' in address:
 		begin = address.index('(')
-		end = address.index(')')
-		address = address[:begin] + address[end+1:]
+		if ')' in address:
+			end = address.index(')')
+			address = address[:begin] + address[end+1:]
+		else:
+			address = address[:begin]+' ' + postCode
     
 	#formats the string to make it a valid url
 	#address = urllib.quote(address, safe='') 
@@ -78,7 +81,7 @@ def makeShapeFile():
 				if "0.0" in row['coordinates'] or not row['coordinates'] or "999.999" in row['coordinates'] or "999.000" in row['coordinates']:
 					address = row["address"]          
 					coord = []
-					getLatLong(coord, address)
+					getLatLong(coord, address,row['postalCode'])
 					if coord[0] == 999.999:
 						print "Status over query limit"
 						break
