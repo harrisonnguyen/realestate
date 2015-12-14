@@ -11,6 +11,13 @@ def main():
 	makeShapeFile()
 
 def getLatLong(coord, address):
+	if '&' in address:
+		i = address.index('&')
+		address = address[i+1:]
+	if '(' in address:
+		begin = address.index('(')
+		end = address.index(')')
+		address = address[:begin] + address[end+1:]
     
 	#formats the string to make it a valid url
 	#address = urllib.quote(address, safe='') 
@@ -34,6 +41,11 @@ def getLatLong(coord, address):
 		if "<status>OVER" in string:
 			coord.append(float(999.999))
 			break
+		elif "<status>ZERO" in string:
+			coord.append(float(999.000))
+			break
+		else:
+			pass
 		if "<location>" in string:
 			string = content.pop()
 			string = re.sub("<lat>",'',string)
@@ -55,27 +67,30 @@ def getLatLong(coord, address):
     
     
 def makeShapeFile():
-	with open("realestatedata2000_2040.csv",'r') as p:
-		with open("realestatedata2000_2040a.csv",'w') as csvoutput:
+	with open("realestate_data.csv",'r') as p:
+		with open("realestate_data_coord.csv",'w') as csvoutput:
 			fieldnames = ['sold_date','bathrooms', 'car', 'price','bedrooms', 'descript', 'address', 'postalCode', 'propertyType', 'coordinates']
 			writer = csv.DictWriter(csvoutput, fieldnames=fieldnames, lineterminator='\n')
 			reader = csv.DictReader(p)
 			writer.writeheader()
 			#i = 0
 			for row in reader:                    
-				if "0.0" in row['coordinates'] or not row['coordinates'] or "999.999" in row['coordinates']:
+				if "0.0" in row['coordinates'] or not row['coordinates'] or "999.999" in row['coordinates'] or "999.000" in row['coordinates']:
 					address = row["address"]          
 					coord = []
 					getLatLong(coord, address)
 					if coord[0] == 999.999:
 						print "Status over query limit"
 						break
+					elif coord[0] == 999.000:
+						print "%s not found" %row['address']
+						row.update({'coordinates' : str(coord[0]) + "," +  str(coord[1])})
 					else:
 						row.update({'coordinates' : str(coord[0]) + "," +  str(coord[1])})
 				#if coord[0] == 0: #if the api calls are exhausted
 				#	print row
 				#	break                        
-						print address, ": ", str(coord[0]) + "," +  str(coord[1])
+					print address, ": ", str(coord[0]) + "," +  str(coord[1])
 				#i += 1
 				writer.writerow(row)
 main()
