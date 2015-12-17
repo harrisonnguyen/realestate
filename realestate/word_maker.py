@@ -8,7 +8,7 @@ p = inflect.engine()
 f = open('realestate_vocab.txt')
 vocab = f.read().split()
 file = open('realestate_data.csv','r')
-output = open('realestate_dtm.ldac','w')
+output = open('realestate_dtm1.ldac','w')
 reader = csv.DictReader(file)
 
 #N = 10
@@ -63,13 +63,16 @@ for house in reader:
 								z = en.verb.present(z)
 							except KeyError:
 								pass
-							index = vocab.index(z)
+							try:
+								index = vocab.index(z)
 							#print index
 							#matrix[0,index] += 1
-							if index in matrix:
-								matrix[index]+=1
-							else:
-								matrix[index] = 1
+								if index in matrix:
+									matrix[index]+=1
+								else:
+									matrix[index] = 1
+							except ValueError:
+								continue
 	#row = '%d' %numpy.sum(matrix, axis=1)
 	#for k in range(0,len(vocab)):
 	#	if matrix[0,k] != 0:
